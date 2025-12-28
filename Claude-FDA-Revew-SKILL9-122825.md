@@ -1488,3 +1488,763 @@ agents:
       Generate a comprehensive, narrative review memorandum (3000-5000 words) following
       FDA memo format. Convert the checklist responses into flowing narrative paragraphs
       organized by review sections. Provide clear fin
+            findings and recommendations.
+    
+    output_requirements:
+      min_word_count: 3000
+      max_word_count: 5500
+      format: "markdown"
+      required_sections:
+        - "Administrative Information"
+        - "Executive Summary"
+        - "Detailed Findings"
+        - "Conclusions and Recommendations"
+
+  # --------------------------------------------------------------------------
+  # Agent 6: Magic Tool - Format Beautifier
+  # --------------------------------------------------------------------------
+  magic_format:
+    name: "Format Beautification Magic Tool"
+    version: "1.0"
+    description: "Transforms messy text into clean, professional markdown"
+    
+    model: "gpt-4o-mini"
+    temperature: 0.1
+    max_tokens: 15000
+    
+    system_prompt: |
+      You are a document formatting specialist who transforms messy, poorly formatted
+      text into clean, professional markdown documents suitable for regulatory use.
+      
+      Apply these transformations:
+      - Detect and apply proper heading hierarchy (H1-H6)
+      - Convert informal lists to markdown bullets or numbered lists
+      - Create markdown tables from tabular data
+      - Add bold/italic emphasis to key terms
+      - Format citations as blockquotes
+      - Wrap technical content in code blocks
+      - Add proper paragraph spacing and line breaks
+      - Insert section dividers (---) between major sections
+      - Standardize punctuation, spacing, and capitalization
+      - Convert URLs to proper markdown links
+      - Add checkboxes for action items
+      
+      Preserve ALL original content - only improve formatting, structure, and readability.
+      Do not add, remove, or significantly modify the actual information.
+      
+      Output clean, professional markdown suitable for regulatory documentation.
+    
+    user_prompt_template: |
+      Please transform the following messy text into clean, professional markdown:
+      
+      ```
+      {messy_text}
+      ```
+      
+      Apply proper formatting, structure, and markdown styling. Make it professional
+      and easy to read while preserving all original information.
+    
+    output_requirements:
+      format: "markdown"
+      preserve_content: true
+
+  # --------------------------------------------------------------------------
+  # Agent 7: Magic Tool - Keyword Highlighter
+  # --------------------------------------------------------------------------
+  magic_keywords:
+    name: "Keyword Extraction & Highlighting Magic Tool"
+    version: "1.0"
+    description: "Extracts and color-codes key regulatory terms"
+    
+    model: "gpt-4o-mini"
+    temperature: 0.2
+    max_tokens: 15000
+    
+    system_prompt: |
+      You are a regulatory keyword extraction specialist who identifies and highlights
+      key terms in medical device documents.
+      
+      Extract keywords in these categories:
+      1. Device Names (Blue: #4A90E2)
+      2. Regulatory Terms (Purple: #9B59B6)
+      3. Standards (Green: #27AE60)
+      4. Risks/Hazards (Red: #E74C3C)
+      5. Tests/Methods (Yellow: #F39C12)
+      6. Acceptance Criteria (Orange: #E67E22)
+      7. Findings/Results (Brown: #8B4513)
+      8. Action Items (Dark Gray: #34495E)
+      
+      Apply HTML color spans to highlight keywords inline:
+      <span style="color:#HEX">**keyword**</span>
+      
+      At the end, provide a keyword legend showing:
+      - Category emoji and name
+      - Count of occurrences
+      - List of keywords found in that category
+      
+      Preserve the document's original structure and content while adding highlights.
+    
+    user_prompt_template: |
+      Please extract and highlight key regulatory keywords in the following document:
+      
+      ```markdown
+      {document_text}
+      ```
+      
+      Color Scheme:
+      {color_scheme}
+      
+      Apply colored highlights to all identified keywords and provide a comprehensive
+      keyword legend at the end.
+    
+    output_requirements:
+      format: "markdown_with_html"
+      include_legend: true
+
+  # --------------------------------------------------------------------------
+  # Agent 8: Magic Tool - Action Item Extractor
+  # --------------------------------------------------------------------------
+  magic_actions:
+    name: "Action Item Extraction Magic Tool"
+    version: "1.0"
+    description: "Extracts actionable tasks and generates prioritized checklist"
+    
+    model: "gpt-4o-mini"
+    temperature: 0.2
+    max_tokens: 15000
+    
+    system_prompt: |
+      You are an action item extraction specialist who identifies all actionable
+      tasks, questions, and follow-up items from regulatory documents.
+      
+      Detect action items from:
+      - Explicit actions: "TODO:", "Action:", "Must", "Should", "Need to"
+      - Questions requiring answers
+      - Identified gaps or missing information
+      - Requests for additional data
+      
+      For each action item, provide:
+      - Unique ID (ITEM-NNN)
+      - Title (brief description)
+      - Priority (HIGH/MEDIUM/LOW based on regulatory importance)
+      - Category (e.g., Performance Testing, Risk Management, Labeling)
+      - Detailed Description
+      - Assignee (if mentioned, or "TBD")
+      - Estimated Effort
+      - Due Date (if mentioned, or suggest based on priority)
+      - Status (default: Not Started)
+      - Dependencies
+      - Checkbox markdown: - [ ] Action description
+      - Notes
+      
+      Organize actions by priority (HIGH, MEDIUM, LOW) and create:
+      1. Detailed action item cards for each item
+      2. Summary table with all actions
+      3. Quick-copy checklist with all items
+      
+      Be thorough - extract ALL actionable items, including implicit ones.
+    
+    user_prompt_template: |
+      Please extract all action items from the following document and create a
+      comprehensive, prioritized task list:
+      
+      ```markdown
+      {document_text}
+      ```
+      
+      Identify explicit and implicit action items. Generate detailed action cards,
+      a summary table, and a quick-copy checklist.
+    
+    output_requirements:
+      format: "markdown"
+      min_actions: 5
+      required_fields:
+        - "ID"
+        - "Title"
+        - "Priority"
+        - "Description"
+        - "Checkbox"
+
+  # --------------------------------------------------------------------------
+  # Agent 9: Magic Tool - Concept Map Generator
+  # --------------------------------------------------------------------------
+  magic_concept_map:
+    name: "Concept Map Generation Magic Tool"
+    version: "1.0"
+    description: "Generates Mermaid diagrams showing concept relationships"
+    
+    model: "gpt-4o-mini"
+    temperature: 0.3
+    max_tokens: 12000
+    
+    system_prompt: |
+      You are a concept mapping specialist who creates visual relationship diagrams
+      in Mermaid markdown format.
+      
+      Analyze documents to:
+      1. Extract key concepts, entities, and components
+      2. Identify relationships between concepts (causes, mitigates, requires, etc.)
+      3. Detect hierarchies and dependencies
+      4. Recognize process flows
+      
+      Generate Mermaid diagrams in appropriate formats:
+      - Flowcharts: For processes and decision trees
+      - Graphs: For risk-mitigation networks, entity relationships
+      - Mind Maps: For concept hierarchies
+      - Sequence Diagrams: For temporal interactions
+      
+      Apply color coding to node categories:
+      - Risks: #ffcccc (light red)
+      - Controls/Mitigations: #ccffcc (light green)
+      - Tests/Verification: #ccccff (light blue)
+      - Documentation: #ffffcc (light yellow)
+      
+      Include:
+      - Clear node labels
+      - Relationship labels on edges
+      - Subgraphs for logical grouping
+      - Legend explaining colors and symbols
+      - Insights summary (statistics about the concept map)
+      
+      Ensure valid Mermaid syntax that renders correctly.
+    
+    user_prompt_template: |
+      Please analyze the following document and generate a comprehensive concept map
+      in Mermaid format:
+      
+      ```markdown
+      {document_text}
+      ```
+      
+      Diagram Type: {diagram_type}
+      
+      Create a visual concept map showing key entities and their relationships.
+      Include color coding, legends, and a summary of insights.
+    
+    output_requirements:
+      format: "mermaid_markdown"
+      include_legend: true
+      valid_syntax: true
+
+  # --------------------------------------------------------------------------
+  # Agent 10: Magic Tool - Glossary Generator
+  # --------------------------------------------------------------------------
+  magic_glossary:
+    name: "Glossary Generation Magic Tool"
+    version: "1.0"
+    description: "Creates comprehensive glossaries of technical and regulatory terms"
+    
+    model: "gpt-4o-mini"
+    temperature: 0.2
+    max_tokens: 18000
+    
+    system_prompt: |
+      You are a regulatory terminology specialist who creates comprehensive glossaries
+      for medical device documents.
+      
+      Identify and define:
+      1. Acronyms (CGM, IFU, SE, NSE, V&V, EMC, etc.)
+      2. Regulatory terms (510(k), Predicate Device, Substantial Equivalence, etc.)
+      3. Standards (ISO 10993-1, IEC 60601-1, ASTM F2150, etc.)
+      4. Technical terms (electrochemical sensor, glucose oxidase, etc.)
+      5. Clinical terms (Type 2 Diabetes, hypoglycemia, etc.)
+      6. Testing methods (bench testing, biocompatibility testing, etc.)
+      7. Device components (transmitter, sensor, adhesive, etc.)
+      8. Risk terminology (hazard, severity, residual risk, etc.)
+      
+      For each term provide:
+      - Term name (bold, alphabetized)
+      - Clear, context-appropriate definition (2-4 sentences)
+      - Frequency count (how often it appears in document)
+      - Related terms (cross-references)
+      - Acronym expansion (if applicable)
+      
+      Organize alphabetically by term. Include:
+      - Header with document source and generation date
+      - Glossary entries organized A-Z
+      - Footer note explaining glossary purpose
+      
+      Definitions should be accurate, professional, and appropriate for regulatory audiences.
+    
+    user_prompt_template: |
+      Please generate a comprehensive glossary of technical and regulatory terms
+      from the following document:
+      
+      ```markdown
+      {document_text}
+      ```
+      
+      Extract and define all key terms, acronyms, standards, and specialized terminology.
+      Organize alphabetically and include frequency counts and cross-references.
+    
+    output_requirements:
+      format: "markdown"
+      min_terms: 20
+      alphabetized: true
+      include_frequency: true
+
+  # --------------------------------------------------------------------------
+  # Agent 11: Regulatory Analytics Dashboard
+  # --------------------------------------------------------------------------
+  analytics_dashboard:
+    name: "Regulatory Analytics Dashboard Agent"
+    version: "1.0"
+    description: "Generates data-driven insights and visualizations from review history"
+    
+    model: "gpt-4o-mini"
+    temperature: 0.3
+    max_tokens: 10000
+    
+    system_prompt: |
+      You are a regulatory analytics specialist who interprets submission data
+      and provides actionable insights.
+      
+      When provided with review history data, generate:
+      1. Key Performance Indicator (KPI) summaries
+      2. Trend analyses (submission volumes, review times, clearance rates)
+      3. Reviewer workload assessments
+      4. Device type distribution analyses
+      5. AI request pattern identification
+      6. Predictive insights (clearance probability, risk alerts)
+      7. Recommendations for process improvements
+      
+      Present insights in clear, business-friendly language with supporting data.
+      Use markdown formatting with tables, bullet points, and emphasis.
+      
+      Focus on actionable insights that inform decision-making.
+    
+    user_prompt_template: |
+      Please analyze the following regulatory review data and generate insights:
+      
+      **Review History Data**:
+      ```
+      {review_data}
+      ```
+      
+      Provide:
+      1. KPI summary
+      2. Trend analysis
+      3. Performance insights
+      4. Risk alerts
+      5. Actionable recommendations
+    
+    output_requirements:
+      format: "markdown"
+      include_visualizations: true
+
+# ============================================================================
+# WORKFLOW DEFINITIONS
+# ============================================================================
+workflows:
+
+  # Full 510(k) Review Workflow
+  full_review:
+    name: "Complete 510(k) Review Workflow"
+    description: "End-to-end review process from submission analysis to final report"
+    steps:
+      - agent: intelligence_analyst
+        input: "{user_device_info}"
+        output_var: "analysis_report"
+      
+      - agent: magic_keywords
+        input: "{analysis_report}"
+        output_var: "highlighted_report"
+      
+      - agent: magic_actions
+        input: "{highlighted_report}"
+        output_var: "action_items"
+      
+      - agent: magic_concept_map
+        input: "{analysis_report}"
+        output_var: "concept_map"
+      
+      - agent: magic_glossary
+        input: "{analysis_report}"
+        output_var: "glossary"
+      
+      - agent: report_builder
+        input: 
+          checklist: "{checklist}"
+          results: "{review_results}"
+        output_var: "final_report"
+
+  # Document Enhancement Workflow (All Magic Tools)
+  document_enhancement:
+    name: "Document Enhancement Workflow"
+    description: "Apply all Magic tools to enhance a document"
+    steps:
+      - agent: magic_format
+        input: "{raw_document}"
+        output_var: "formatted_doc"
+      
+      - agent: magic_keywords
+        input: "{formatted_doc}"
+        output_var: "highlighted_doc"
+      
+      - agent: magic_actions
+        input: "{highlighted_doc}"
+        output_var: "action_list"
+      
+      - agent: magic_concept_map
+        input: "{highlighted_doc}"
+        output_var: "visual_map"
+      
+      - agent: magic_glossary
+        input: "{highlighted_doc}"
+        output_var: "term_glossary"
+
+# ============================================================================
+# VALIDATION RULES
+# ============================================================================
+validation:
+  input:
+    max_length: 100000  # Maximum input text length (characters)
+    required_fields:
+      intelligence_analyst: ["device_name", "additional_context"]
+      document_comparator: ["old_version_text", "new_version_text"]
+      entity_extractor: ["document_text"]
+  
+  output:
+    intelligence_analyst:
+      min_tables: 5
+      min_words: 3000
+    
+    document_comparator:
+      min_differences: 100
+    
+    entity_extractor:
+      min_entities: 20
+      min_words: 3000
+
+# ============================================================================
+# PROMPT TEMPLATES
+# ============================================================================
+prompt_templates:
+  
+  device_analysis_short:
+    template: |
+      Analyze this device: {device_name}
+      
+      Key information:
+      - Product Code: {product_code}
+      - Indication: {indication}
+      
+      Provide a brief regulatory assessment (500 words).
+  
+  comparative_analysis:
+    template: |
+      Compare these two devices:
+      
+      **Subject Device**: {subject_device}
+      **Predicate Device**: {predicate_device}
+      
+      Focus on:
+      - Indications for use
+      - Technological characteristics
+      - Performance testing
+      
+      Provide substantial equivalence assessment.
+  
+  risk_assessment_focused:
+    template: |
+      Perform a detailed risk assessment for:
+      
+      **Device**: {device_name}
+      **Hazards**: {identified_hazards}
+      
+      Analyze:
+      - Risk severity and probability
+      - Adequacy of risk controls
+      - Residual risk acceptability
+      
+      Provide recommendations.
+
+# ============================================================================
+# LANGUAGE-SPECIFIC SETTINGS
+# ============================================================================
+language_settings:
+  English:
+    date_format: "%B %d, %Y"
+    number_format: "1,234.56"
+    
+  "Traditional Chinese (繁體中文)":
+    date_format: "%Y年%m月%d日"
+    number_format: "1,234.56"
+    translation_glossary:
+      "510(k)": "510(k)上市前通知"
+      "Substantial Equivalence": "實質等效性"
+      "Predicate Device": "比對裝置"
+      "Additional Information": "補件要求"
+      "Device Description": "裝置說明"
+      "Risk Management": "風險管理"
+      "Performance Testing": "性能測試"
+
+# ============================================================================
+# FEATURE FLAGS
+# ============================================================================
+features:
+  enable_analytics_dashboard: true
+  enable_magic_tools: true
+  enable_document_comparison: true
+  enable_multilingual: true
+  enable_workflow_chaining: true
+  enable_hot_reload: false
+  enable_caching: true
+  cache_ttl_seconds: 3600
+
+# ============================================================================
+# ERROR HANDLING
+# ============================================================================
+error_handling:
+  max_retries: 3
+  retry_delay_seconds: 2
+  fallback_model: "gpt-4o-mini"
+  
+  error_messages:
+    insufficient_output: "Agent output did not meet minimum requirements. Please provide more detailed information."
+    invalid_format: "Agent output format is invalid. Expected {expected_format}."
+    timeout: "Agent processing timed out after {timeout_seconds} seconds."
+
+# ============================================================================
+# LOGGING & MONITORING
+# ============================================================================
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_agent_inputs: true
+  log_agent_outputs: true
+  log_performance_metrics: true
+  
+  performance_thresholds:
+    warning_seconds: 30
+    error_seconds: 60
+
+# ============================================================================
+# END OF CONFIGURATION
+# ============================================================================
+
+Configuration Usage Examples
+Loading Configuration in Python
+pythonCopyimport yaml
+from pathlib import Path
+
+class AgentConfig:
+    """Agent configuration loader and manager"""
+    
+    def __init__(self, config_path: str = "agents_config.yaml"):
+        self.config_path = Path(config_path)
+        self.config = self.load_config()
+    
+    def load_config(self) -> dict:
+        """Load YAML configuration file"""
+        with open(self.config_path, 'r', encoding='utf-8') as f:
+            return yaml.safe_load(f)
+    
+    def get_agent_config(self, agent_name: str) -> dict:
+        """Get configuration for specific agent"""
+        return self.config['agents'].get(agent_name, {})
+    
+    def get_system_prompt(self, agent_name: str) -> str:
+        """Get system prompt for agent"""
+        agent_config = self.get_agent_config(agent_name)
+        return agent_config.get('system_prompt', '')
+    
+    def get_user_prompt_template(self, agent_name: str) -> str:
+        """Get user prompt template for agent"""
+        agent_config = self.get_agent_config(agent_name)
+        return agent_config.get('user_prompt_template', '')
+    
+    def format_user_prompt(self, agent_name: str, **kwargs) -> str:
+        """Format user prompt with provided variables"""
+        template = self.get_user_prompt_template(agent_name)
+        return template.format(**kwargs)
+    
+    def get_model_params(self, agent_name: str) -> dict:
+        """Get model parameters for agent"""
+        agent_config = self.get_agent_config(agent_name)
+        return {
+            'model': agent_config.get('model', self.config['global']['default_model']),
+            'temperature': agent_config.get('temperature', self.config['global']['default_temperature']),
+            'max_tokens': agent_config.get('max_tokens', self.config['global']['default_max_tokens'])
+        }
+    
+    def validate_output(self, agent_name: str, output: str) -> tuple[bool, str]:
+        """Validate agent output meets requirements"""
+        agent_config = self.get_agent_config(agent_name)
+        requirements = agent_config.get('output_requirements', {})
+        
+        # Check minimum word count
+        if 'min_word_count' in requirements:
+            word_count = len(output.split())
+            if word_count < requirements['min_word_count']:
+                return False, f"Output has {word_count} words, minimum required: {requirements['min_word_count']}"
+        
+        # Check minimum tables (for intelligence_analyst)
+        if 'min_tables' in requirements:
+            table_count = output.count('|---')  # Count markdown table separators
+            if table_count < requirements['min_tables']:
+                return False, f"Output has {table_count} tables, minimum required: {requirements['min_tables']}"
+        
+        # Check required sections
+        if 'required_sections' in requirements:
+            for section in requirements['required_sections']:
+                if section not in output:
+                    return False, f"Required section missing: {section}"
+        
+        return True, "Output validation passed"
+
+# Usage example
+config = AgentConfig()
+
+# Get agent configuration
+analyst_config = config.get_agent_config('intelligence_analyst')
+print(f"Analyst Model: {analyst_config['model']}")
+print(f"Temperature: {analyst_config['temperature']}")
+
+# Get and format prompts
+system_prompt = config.get_system_prompt('intelligence_analyst')
+user_prompt = config.format_user_prompt(
+    'intelligence_analyst',
+    device_name="Acme CGM",
+    k_number="K240156",
+    sponsor="Acme Medical Corp",
+    product_code="NBW",
+    additional_context="Continuous glucose monitor for Type 2 diabetes"
+)
+
+# Get model parameters
+model_params = config.get_model_params('intelligence_analyst')
+
+# Validate output
+is_valid, message = config.validate_output('intelligence_analyst', agent_output)
+if not is_valid:
+    print(f"Validation failed: {message}")
+Integrating with LangChain
+pythonCopyfrom langchain.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain.schema import HumanMessage, SystemMessage
+
+class ConfigurableAgent:
+    """Agent that loads configuration from YAML"""
+    
+    def __init__(self, agent_name: str, config: AgentConfig):
+        self.agent_name = agent_name
+        self.config = config
+        self.agent_config = config.get_agent_config(agent_name)
+        
+        # Initialize LLM with configured parameters
+        model_params = config.get_model_params(agent_name)
+        self.llm = ChatOpenAI(
+            model=model_params['model'],
+            temperature=model_params['temperature'],
+            max_tokens=model_params['max_tokens']
+        )
+    
+    def run(self, **input_vars) -> str:
+        """Execute agent with provided input variables"""
+        
+        # Format prompts
+        system_prompt = self.config.get_system_prompt(self.agent_name)
+        user_prompt = self.config.format_user_prompt(self.agent_name, **input_vars)
+        
+        # Create messages
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt)
+        ]
+        
+        # Get response
+        response = self.llm.invoke(messages)
+        output = response.content
+        
+        # Validate output
+        is_valid, validation_message = self.config.validate_output(self.agent_name, output)
+        if not is_valid:
+            print(f"⚠️ Warning: {validation_message}")
+        
+        return output
+
+# Usage
+config = AgentConfig()
+
+# Create intelligence analyst agent
+analyst_agent = ConfigurableAgent('intelligence_analyst', config)
+
+# Run agent
+result = analyst_agent.run(
+    device_name="Acme CGM",
+    k_number="K240156",
+    sponsor="Acme Medical Corp",
+    product_code="NBW",
+    additional_context="Continuous glucose monitor for Type 2 diabetes"
+)
+
+print(result)
+
+Benefits of YAML Configuration
+1. Non-Programmer Friendly
+
+Regulatory SMEs can modify prompts without coding knowledge
+Clear, readable structure
+Comments explain each configuration section
+
+2. Version Control
+
+Track changes to agent behavior over time
+Easy rollback if needed
+Collaborative editing with git
+
+3. Rapid Iteration
+
+Test different prompts without code changes
+A/B test agent configurations
+Quick adjustments based on feedback
+
+4. Centralized Management
+
+All agent behaviors defined in one place
+Consistent structure across agents
+Easy to audit and review
+
+5. Flexibility
+
+Add new agents by adding YAML entries
+Modify existing agents without deployment
+Feature flags for easy enable/disable
+
+6. Validation & Quality Control
+
+Output requirements ensure quality
+Validation rules catch issues early
+Standardized error handling
+
+
+Use Cases
+
+Prompt Engineering: Iterate on prompts to improve agent performance
+Multi-Model Testing: Compare different LLMs for same task
+Workflow Customization: Define custom agent workflows for specific review types
+Regulatory Compliance: Document agent behaviors for validation
+Team Collaboration: SMEs and developers work together on configuration
+A/B Testing: Test prompt variations systematically
+Localization: Support multiple languages with language-specific settings
+
+
+MANDATORY TRIGGERS
+agent configuration, YAML config, configure agents, agent settings, prompt templates, agent customization, configuration management, agent parameters, workflow configuration, config file
+
+This completes the SKILL.md documentation for the FDA 510(k) Agentic Reviewer system!
+Summary of All 11 Skills:
+
+✅ Multi-Model LLM Integration - 8+ AI models with flexible switching
+✅ Intelligent 510(k) Report Generator - Comprehensive regulatory analysis
+✅ Dual-Version Document Comparator - 100+ difference tracking
+✅ Smart Entity Extraction & Summarization - 20+ entity types
+✅ Guidance-to-Checklist Converter - Automated review checklist generation
+✅ Report Builder from Checklist Results - Formal memo compilation
+✅ Bilingual Output System - English + Traditional Chinese
+✅ Persistent Session State Management - Review history tracking
+✅ AI Magic Tools Suite - 5 document enhancement magics
+✅ Regulatory Analytics Dashboard - Data-driven insights & KPIs
+✅ YAML-Based Agent Configuration System - Flexible, file-based configuration
+
+Total documentation: ~28,000 words covering all capabilities, examples, triggers, and implementation details! 🎉
